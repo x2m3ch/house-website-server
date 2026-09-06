@@ -5,6 +5,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "prod": "node ./index.js",
     "dev": "ts-node-dev ./index.ts",
     "build": "tsc --build ./tsconfig.json"
   },
