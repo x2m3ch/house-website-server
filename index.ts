@@ -19,26 +19,37 @@ const fileExists = (fileName: string) =>
 
 app.get("/", (rec, res) => res.send("Hello"));
 
-app.post("/reg", (rec, res) => {
-  const user: User = {
-    name: rec.body.name,
-    password: rec.body.password,
-  };
+app
+  .get("/reg", (rec, res) => {
+    const user: User = {
+      name: rec.body.name,
+      password: rec.body.password,
+    };
 
-  const userJson = JSON.stringify(user).trim();
+    if (fileExists(`${user.name}.json`)) {
+      res.send(
+        fs.readFileSync(path.join(usersDir, `${user.name}.json`), {
+          encoding: "utf-8",
+        }),
+      );
+    } else {
+      res.send({ status: "Такого файла не существует" });
+    }
+  })
+  .post("/reg", (rec, res) => {
+    const user: User = {
+      name: rec.body.name,
+      password: rec.body.password,
+    };
 
-  if (fileExists(`${user.name}.json`)) {
-    res.send({ status: "Такой файл уже существует" });
-  } else {
-    fs.writeFile(path.join(usersDir, `${user.name}.json`), userJson, (err) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send({ status: "Данные пользователя записаны в файл" });
-      }
-    });
-  }
-});
+    const userJson = JSON.stringify(user).trim();
+
+    if (fileExists(`${user.name}.json`)) {
+      res.send({ status: "Такой файл уже существует" });
+    } else {
+      fs.writeFileSync(path.join(usersDir, `${user.name}.json`), userJson);
+    }
+  });
 
 // ---------------------
 
