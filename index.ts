@@ -21,21 +21,13 @@ app.get("/", (rec, res) => res.send("Hello"));
 
 app
   .get("/reg", (rec, res) => {
-    const user: User = {
-      name: rec.body.name,
-      password: rec.body.password,
-    };
-
-    if (fileExists(`${user.name}.json`)) {
-      res.send(
-        fs.readFileSync(path.join(usersDir, `${user.name}.json`), {
-          encoding: "utf-8",
-        }),
-      );
+    if (fileExists(`${rec.body.name}.json`)) {
+      res.send(fs.readFileSync(path.join(usersDir, `${rec.body.name}.json`)));
     } else {
-      res.send({ status: "Такого файла не существует" });
+      res.status(404).send({ status: "Такого файла не существует" });
     }
   })
+
   .post("/reg", (rec, res) => {
     const user: User = {
       name: rec.body.name,
@@ -48,6 +40,16 @@ app
       res.send({ status: "Такой файл уже существует" });
     } else {
       fs.writeFileSync(path.join(usersDir, `${user.name}.json`), userJson);
+      res.send({ status: "Пользователь успешно создан" });
+    }
+  })
+
+  .delete("/reg", (rec, res) => {
+    if (fileExists(`${rec.body.name}.json`)) {
+      fs.rmSync(path.join(usersDir, `${rec.body.name}.json`));
+      res.send({ status: "Пользователь успешно удален!" });
+    } else {
+      res.send({ status: "Такого пользователя не существует" });
     }
   });
 
