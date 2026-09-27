@@ -1,21 +1,13 @@
 import express from "express";
-import fs from "fs";
-import path from "path";
 
 const app = express();
 
 app.use(express.json());
 
-const usersDir = path.join(__dirname, "users");
-
 type userType = { id: number; name: string; password: string };
 
 const USERS: userType[] = [];
 let currentUserId = 1;
-
-class File {
-  exist = (fileName: string) => fs.existsSync(path.join(usersDir, fileName));
-}
 
 class User {
   add = (name: string, password: string) => {
