@@ -2,35 +2,37 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 
-import { User } from "./server/interfaces/User";
-
 const app = express();
 
 app.use(express.json());
 
 const usersDir = path.join(__dirname, "users");
 
-const fileExists = (fileName: string) =>
-  fs.existsSync(path.join(usersDir, fileName));
-
 type userType = { id: number; name: string; password: string };
 
+const USERS: userType[] = [];
 let currentUserId = 1;
 
-const users: userType[] = [];
+class File {
+  exist = (fileName: string) => fs.existsSync(path.join(usersDir, fileName));
+}
 
-const addUser = (name: string, password: string) => {
-  users.push({ id: currentUserId, name: name, password: password });
-  currentUserId += 1;
-};
+class User {
+  add = (name: string, password: string) => {
+    USERS.push({ id: currentUserId, name: name, password: password });
+    currentUserId += 1;
+  };
+}
 
-addUser("Anton", "dwjfnmlkmw");
+const user = new User();
+
+user.add("Anton", "dwjfnmlkmw");
 
 app
   .get("/user/:id", (req, res) => {
     const userId = Number(req.params.id);
 
-    const user = users.find((user) => user.id === userId);
+    const user = USERS.find((user) => user.id === userId);
 
     if (!user) {
       return res.status(404).json({ message: "Пользователь не найден!" });
@@ -42,7 +44,7 @@ app
   .get("/user", (req, res) => {
     const userId = Number(req.query.id);
 
-    const user = users.find((user) => user.id === userId);
+    const user = USERS.find((user) => user.id === userId);
 
     if (!user) {
       return res.status(404).json({ message: "Пользователь не найден!" });
@@ -52,10 +54,10 @@ app
   })
 
   .post("/user", (req, res) => {
-    const userName = users.find((user) => user.name === req.body.name);
+    const userName = USERS.find((user) => user.name === req.body.name);
 
     if (!userName) {
-      addUser(req.body.name, req.body.password);
+      user.add(req.body.name, req.body.password);
 
       return res.json({
         message: "Пользователь добавлен!",
@@ -68,7 +70,7 @@ app
   });
 
 app.get("/users", (req, res) => {
-  res.json(users);
+  res.json(USERS);
 });
 
 // ---------------------
