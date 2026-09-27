@@ -8,51 +8,69 @@ const app = express();
 
 app.use(express.json());
 
-// ---------------------
-
 const usersDir = path.join(__dirname, "users");
 
 const fileExists = (fileName: string) =>
   fs.existsSync(path.join(usersDir, fileName));
 
-// -----------------------
+type userType = { id: number; name: string; password: string };
 
-app.get("/", (rec, res) => res.send("Hello"));
+let currentUserId = 1;
+
+const users: userType[] = [];
+
+const addUser = (name: string, password: string) => {
+  users.push({ id: currentUserId, name: name, password: password });
+  currentUserId += 1;
+};
+
+addUser("Anton", "dwjfnmlkmw");
 
 app
-  .get("/reg", (rec, res) => {
-    if (fileExists(`${rec.body.name}.json`)) {
-      res.send(fs.readFileSync(path.join(usersDir, `${rec.body.name}.json`)));
-    } else {
-      res.status(404).send({ status: "Такого файла не существует" });
+  .get("/user/:id", (req, res) => {
+    const userId = Number(req.params.id);
+
+    const user = users.find((user) => user.id === userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден!" });
     }
+
+    res.json(user);
   })
 
-  .post("/reg", (rec, res) => {
-    const user: User = {
-      name: rec.body.name,
-      password: rec.body.password,
-    };
+  .get("/user", (req, res) => {
+    const userId = Number(req.query.id);
 
-    const userJson = JSON.stringify(user).trim();
+    const user = users.find((user) => user.id === userId);
 
-    if (fileExists(`${user.name}.json`)) {
-      res.send({ status: "Такой файл уже существует" });
-    } else {
-      fs.writeFileSync(path.join(usersDir, `${user.name}.json`), userJson);
-      res.send({ status: "Пользователь успешно создан" });
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден!" });
     }
+
+    res.json(user);
   })
 
-  .delete("/reg", (rec, res) => {
-    if (fileExists(`${rec.body.name}.json`)) {
-      fs.rmSync(path.join(usersDir, `${rec.body.name}.json`));
-      res.send({ status: "Пользователь успешно удален!" });
-    } else {
-      res.send({ status: "Такого пользователя не существует" });
+  .post("/user", (req, res) => {
+    const userName = users.find((user) => user.name === req.body.name);
+
+    if (!userName) {
+      addUser(req.body.name, req.body.password);
+
+      return res.json({
+        message: "Пользователь добавлен!",
+      });
     }
+
+    res.json({
+      message: "Пользователь с таким именем уже существует!",
+    });
   });
+
+app.get("/users", (req, res) => {
+  res.json(users);
+});
 
 // ---------------------
 
-app.listen(2323);
+app.listen(process.env.PORT);

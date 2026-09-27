@@ -2,7 +2,7 @@
   "name": "house-website-server",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "prod": "node ./index.js",
