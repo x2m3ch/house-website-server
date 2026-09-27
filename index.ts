@@ -6,14 +6,18 @@ app.use(express.json());
 
 type userType = { id: number; name: string; password: string };
 
-const USERS: userType[] = [];
 let currentUserId = 1;
+const USERS: userType[] = [];
 
 class User {
   add = (name: string, password: string) => {
     USERS.push({ id: currentUserId, name: name, password: password });
     currentUserId += 1;
   };
+
+  getById = (id: number) => USERS.find((user) => user.id === id);
+
+  getByName = (name: string) => USERS.find((user) => user.name === name);
 }
 
 const user = new User();
@@ -24,31 +28,31 @@ app
   .get("/user/:id", (req, res) => {
     const userId = Number(req.params.id);
 
-    const user = USERS.find((user) => user.id === userId);
+    const findUserById = user.getById(userId);
 
-    if (!user) {
+    if (!findUserById) {
       return res.status(404).json({ message: "Пользователь не найден!" });
     }
 
-    res.json(user);
+    res.json(findUserById);
   })
 
   .get("/user", (req, res) => {
     const userId = Number(req.query.id);
 
-    const user = USERS.find((user) => user.id === userId);
+    const findUserById = user.getById(userId);
 
-    if (!user) {
+    if (!findUserById) {
       return res.status(404).json({ message: "Пользователь не найден!" });
     }
 
-    res.json(user);
+    res.json(findUserById);
   })
 
   .post("/user", (req, res) => {
-    const userName = USERS.find((user) => user.name === req.body.name);
+    const findUserName = user.getByName(req.body.name);
 
-    if (!userName) {
+    if (!findUserName) {
       user.add(req.body.name, req.body.password);
 
       return res.json({
@@ -56,7 +60,7 @@ app
       });
     }
 
-    res.json({
+    res.status(404).json({
       message: "Пользователь с таким именем уже существует!",
     });
   });
@@ -65,6 +69,4 @@ app.get("/users", (req, res) => {
   res.json(USERS);
 });
 
-// ---------------------
-
-app.listen(process.env.PORT);
+app.listen(2323);
