@@ -2,7 +2,7 @@
 import express from "express";
 
 // -- Imports Routes
-import userRouter from "./server/routes/user.routes";
+import { userRouter } from "./server/modules/controllers/user.controller";
 
 const app = express();
 
