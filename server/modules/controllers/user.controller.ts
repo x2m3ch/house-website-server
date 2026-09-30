@@ -56,6 +56,49 @@ export const userRouter = router
     });
   })
 
+  .delete("/user/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    const getUserExist = await user.getOneUserById(id);
+
+    if (getUserExist.rows[0] == undefined) {
+      return res.json({ response: "Такого пользователя не существует" });
+    }
+
+    await user.deleteUser(id);
+
+    res.json({
+      message: "Пользователь успешно удален!",
+    });
+  })
+
+  .delete("/user", async (req, res) => {
+    const id = Number(req.query.id);
+    const getUserExist = await user.getOneUserById(id);
+
+    if (getUserExist.rows[0] == undefined) {
+      return res.json({ response: "Такого пользователя не существует" });
+    }
+
+    await user.deleteUser(id);
+
+    res.json({
+      message: "Пользователь успешно удален!",
+    });
+  })
+
+  .patch("/user", async (req, res) => {
+    const { id, patch, value } = req.body;
+    const getUserExist = await user.getOneUserById(id);
+
+    if (getUserExist.rows[0] == undefined) {
+      return res.json({ response: "Такого пользователя не существует" });
+    }
+
+    await user.patchUser(id, patch, value);
+
+    await res.json({ response: "Значение успешно изменено!" });
+  })
+
   .get("/users", async (req, res) => {
     res.json({
       response: (await user.getUsers()).rows,

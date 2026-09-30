@@ -17,4 +17,17 @@ export class UserService {
     );
 
   getUsers = () => database.query("SELECT * FROM users");
+
+  deleteUser = (id: number) =>
+    database.query(`DELETE FROM users WHERE id = $1`, [id]);
+
+  patchUser = (
+    id: number,
+    whatPatch: "name" | "password" | "email",
+    newValue: string,
+  ) =>
+    database.query(`UPDATE users SET ${whatPatch} = $1 WHERE id = $2`, [
+      newValue,
+      id,
+    ]);
 }
