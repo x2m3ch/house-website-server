@@ -1,9 +1,9 @@
-import { userController } from "../services/user.service";
+import { UserService } from "../services/user.service";
 import { Router } from "express";
 
 const router = Router();
 
-const user = new userController();
+const user = new UserService();
 
 export const userRouter = router
   .get("/user/:id", async (req, res) => {
@@ -26,8 +26,6 @@ export const userRouter = router
     const userId = Number(req.query.id);
     const person = await user.getOneUserById(userId);
 
-    console.log(person.rows);
-
     if (JSON.stringify(person.rows) == "[]") {
       res.status(404).json({
         description: "Пользователь не найден!",
@@ -41,10 +39,8 @@ export const userRouter = router
   })
 
   .post("/user", async (req, res) => {
-    const getPersonExist = await user.getOneUserByNameAndPassword(
-      req.body.name,
-      req.body.password,
-    );
+    const { name, password, email } = req.body;
+    const getPersonExist = await user.getOneUser(name, password, email);
 
     if (getPersonExist.rows[0] != undefined) {
       return res
@@ -54,7 +50,9 @@ export const userRouter = router
 
     res.json({
       description: "Пользователь успешно создан!",
-      response: (await user.addUser(req.body.name, req.body.password)).rows[0],
+      response: (
+        await user.addUser(req.body.name, req.body.password, req.body.email)
+      ).rows[0],
     });
   })
 
