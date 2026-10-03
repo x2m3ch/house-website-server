@@ -1,9 +1,19 @@
-import { Pool } from "pg";
+import { DataSource } from "typeorm";
+import { users } from "./entitites/user.entity";
+import "reflect-metadata";
 
-export const database = new Pool({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+export const database = new DataSource({
+  type: "postgres",
+
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
-  database: process.env.DB_DATABASE,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_BASE,
+
+  entities: [users],
+  logging: true,
+  synchronize: true,
 });
+
+export const userRepo = database.getRepository(users);
