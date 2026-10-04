@@ -4,7 +4,7 @@ import "dotenv/config";
 import { database } from "./server/database/database";
 
 // -- Imports Routes
-import { userRouter } from "./server/modules/controllers/user.controller";
+import { userRouter } from "./server/modules/routes/user.route";
 
 const app = express();
 const port = process.env.PORT || 5000;

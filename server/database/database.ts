@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import { users } from "./entitites/user.entity";
+import { Users as users } from "./entitites/user.entity";
 import "reflect-metadata";
 
 export const database = new DataSource({
