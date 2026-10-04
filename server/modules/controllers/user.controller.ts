@@ -80,6 +80,7 @@ export const userRouter = router
   .patch("/user", async (req, res) => {
     const { userId, whatPatch, value } = req.body;
     const userInfo = await userRepo.findBy({ id: userId });
+    const typesPatch = ["name", "password", "email"];
 
     if (JSON.stringify(userInfo) == "[]") {
       return res
@@ -87,9 +88,15 @@ export const userRouter = router
         .json({ responce: "Такой пользователь не найден!" });
     }
 
-    userRepo.update({ id: userId }, {});
+    if (!typesPatch.includes(whatPatch)) {
+      return res.status(404).json({ response: "Такое поле не действительно!" });
+    }
 
-    res.json({ responce: `Поле ${whatPatch} успешно измененно!` });
+    userRepo.update({ id: userId }, { [whatPatch]: value });
+
+    res.json({
+      responce: `Поле ${whatPatch} в id ${userId} успешно измененно!`,
+    });
   })
 
   .get("/users", async (req, res) => {
@@ -99,23 +106,3 @@ export const userRouter = router
       response: await userRepo.find(),
     });
   });
-
-/* 
-  .patch("/user", async (req, res) => {
-    const { id, patch, value } = req.body;
-    const getUserExist = await user.getOneUserById(id);
-
-    if (getUserExist.rows[0] == undefined) {
-      return res.json({ response: "Такого пользователя не существует" });
-    }
-
-    await user.patchUser(id, patch, value);
-
-    await res.json({ response: "Значение успешно изменено!" });
-  })
-
-  .get("/users", async (req, res) => {
-    res.json({
-      response: (await user.getUsers()).rows,
-    });
-  }); */
