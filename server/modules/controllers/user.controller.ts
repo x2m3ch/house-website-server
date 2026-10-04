@@ -1,4 +1,6 @@
 import { Router } from "express";
+import bcrypt from "bcryptjs";
+
 import { userRepo } from "../../database/database";
 import { users } from "../../database/entitites/user.entity";
 
@@ -33,11 +35,14 @@ export const userRouter = router
 
   .post("/user", async (req, res) => {
     const { name, password, email } = req.body;
-
+    const hashPassword = await bcrypt.hash(
+      password,
+      Number(process.env.PASSWORD_SALT),
+    );
     const person = new users();
 
     person.name = name;
-    person.password = password;
+    person.password = String(hashPassword);
     person.email = email;
 
     await userRepo.save(person);
@@ -57,7 +62,7 @@ export const userRouter = router
         .json({ responce: "Такой пользователь не найден!" });
     }
 
-    userRepo.delete({ id: userId });
+    await userRepo.delete({ id: userId });
 
     res.json({ response: "Пользователь успешно удален!" });
   })
@@ -72,7 +77,7 @@ export const userRouter = router
         .json({ responce: "Такой пользователь не найден!" });
     }
 
-    userRepo.delete({ id: userId });
+    await userRepo.delete({ id: userId });
 
     res.json({ response: "Пользователь успешно удален!" });
   })
@@ -81,6 +86,10 @@ export const userRouter = router
     const { userId, whatPatch, value } = req.body;
     const userInfo = await userRepo.findBy({ id: userId });
     const typesPatch = ["name", "password", "email"];
+    const hashPassword = await bcrypt.hash(
+      value,
+      Number(process.env.PASSWORD_SALT),
+    );
 
     if (JSON.stringify(userInfo) == "[]") {
       return res
@@ -92,7 +101,10 @@ export const userRouter = router
       return res.status(404).json({ response: "Такое поле не действительно!" });
     }
 
-    userRepo.update({ id: userId }, { [whatPatch]: value });
+    await userRepo.update(
+      { id: userId },
+      { [whatPatch]: whatPatch == "password" ? hashPassword : value },
+    );
 
     res.json({
       responce: `Поле ${whatPatch} в id ${userId} успешно измененно!`,
@@ -100,8 +112,6 @@ export const userRouter = router
   })
 
   .get("/users", async (req, res) => {
-    console.log(userRepo.find());
-
     res.json({
       response: await userRepo.find(),
     });
